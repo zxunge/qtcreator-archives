@@ -48,9 +48,9 @@ jobs:
       shell: msys2 {0}
       run: |
         cp -f psapi.h /mingw32/include/
-        wget -q https://download.qt.io/archive/qtcreator/9.0/9.0.2/qt-creator-opensource-src-9.0.2.tar.gz
-        tar xzf qt-creator-opensource-src-9.0.2.tar.gz
-        cd qt-creator-opensource-src-9.0.2/
+        wget -q https://download.qt.io/archive/qtcreator/7.0/7.0.2/qt-creator-opensource-src-7.0.2.tar.gz
+        tar xzf qt-creator-opensource-src-7.0.2.tar.gz
+        cd qt-creator-opensource-src-7.0.2/
         MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
         cmake . -Wno-dev                              \
           -GNinja                               \
