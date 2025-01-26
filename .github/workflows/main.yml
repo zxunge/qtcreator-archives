@@ -46,7 +46,7 @@ jobs:
         tar xzf qt-creator-opensource-src-7.0.2.tar.gz
         cd qt-creator-opensource-src-7.0.2/
         MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
-        cmake                                         \
+        cmake .                                       \
           -GNinja                               \
           -DCMAKE_INSTALL_PREFIX=/opt/qtcreator \
           -DWITH_DOCS=ON             \
