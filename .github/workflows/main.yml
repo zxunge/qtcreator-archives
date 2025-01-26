@@ -44,9 +44,9 @@ jobs:
     - name: Build
       shell: msys2 {0}
       run: |
-        wget -q https://download.qt.io/archive/qtcreator/7.0/7.0.2/qt-creator-opensource-src-7.0.2.tar.gz
-        tar xzf qt-creator-opensource-src-7.0.2.tar.gz
-        cd qt-creator-opensource-src-7.0.2/
+        wget -q https://download.qt.io/archive/qtcreator/8.0/8.0.2/qt-creator-opensource-src-8.0.2.tar.gz
+        tar xzf qt-creator-opensource-src-8.0.2.tar.gz
+        cd qt-creator-opensource-src-8.0.2/
         MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
         cmake . -Wno-dev                              \
           -GNinja                               \
@@ -57,9 +57,7 @@ jobs:
           -DBUILD_QBS=OFF            \
           -DPython3_EXECUTABLE=/mingw32/bin/python \
           -DWITH_TESTS=OFF           \
-          -DCLANGTOOLING_LINK_CLANG_DYLIB=ON       \
-          -DCMAKE_CXX_COMPILER=clang++             \
-          -DCMAKE_C_COMPILER=clang
+          -DCLANGTOOLING_LINK_CLANG_DYLIB=ON
         cmake --build . --parallel $(nproc)
         cmake --build . --target docs
         cmake --install .
