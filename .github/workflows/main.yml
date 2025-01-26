@@ -33,6 +33,8 @@ jobs:
           mingw-w64-i686-qt5-translations
           mingw-w64-i686-clang-libs
           mingw-w64-i686-clang
+          mingw-w64-i686-llvm
+          mingw-w64-i686-llvm-libs
           mingw-w64-i686-clang-tools-extra
           mingw-w64-i686-ninja
           mingw-w64-i686-python
@@ -55,7 +57,9 @@ jobs:
           -DBUILD_QBS=OFF            \
           -DPython3_EXECUTABLE=/mingw32/bin/python \
           -DWITH_TESTS=OFF           \
-          -DCLANGTOOLING_LINK_CLANG_DYLIB=ON
+          -DCLANGTOOLING_LINK_CLANG_DYLIB=ON       \
+          -DCMAKE_CXX_COMPILER=clang++             \
+          -DCMAKE_C_COMPILER=clang
         cmake --build . --parallel $(nproc)
         cmake --build . --target docs
         cmake --install .
