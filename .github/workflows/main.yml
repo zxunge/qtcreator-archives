@@ -56,7 +56,7 @@ jobs:
           -DPython3_EXECUTABLE=/mingw32/bin/python \
           -DWITH_TESTS=OFF           \
           -DCLANGTOOLING_LINK_CLANG_DYLIB=ON
-        cmake --build .
+        cmake --build . --parallel $(nproc)
         cmake --build . --target docs
         cmake --install .
 
