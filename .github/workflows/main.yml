@@ -2,7 +2,7 @@ name: windows-msys2
 
 on:
   workflow_dispatch:
-  push:
+  #push:
   pull_request:
 
 jobs:
@@ -60,6 +60,14 @@ jobs:
         sed -i '60 s/false/clang::format::FormatStyle::SortUsingDeclarationsOptions::SUD_Never/' src/plugins/clangformat/clangformatbaseindenter.cpp
         sed -i '64 s/style.AlignTrailingComments = false;/style.AlignTrailingComments.Kind = clang::format::FormatStyle::TrailingCommentsAlignmentKinds::TCAS_Never;/' src/plugins/clangformat/clangformatbaseindenter.cpp
         sed -i '77 s/startswith/starts_with/' src/plugins/clangformat/clangformatbaseindenter.cpp
+        sed -i '74 s/style.AlignTrailingComments = true;/style.AlignTrailingComments.Kind = FormatStyle::TrailingCommentsAlignmentKinds::TCAS_Always;/' src/plugins/clangformat/clangformatutils.cpp
+        sed -i '89 s/style.AlwaysBreakAfterReturnType = FormatStyle::RTBS_None;/style.BreakAfterReturnType = FormatStyle::ReturnTypeBreakingStyle::RTBS_Automatic;/' src/plugins/clangformat/clangformatutils.cpp
+        sed -i '91 s/style.AlwaysBreakTemplateDeclarations = FormatStyle::BTDS_Yes;/style.BreakTemplateDeclarations = FormatStyle::BreakTemplateDeclarationsStyle::BTDS_Yes;/' src/plugins/clangformat/clangformatutils.cpp
+        sed -i '121 s/style.ConstructorInitializerAllOnOneLineOrOnePerLine = false;//' src/plugins/clangformat/clangformatutils.cpp
+        sed -i '141 s/style.KeepEmptyLinesAtTheStartOfBlocks = false;//' src/plugins/clangformat/clangformatutils.cpp
+        sed -i '164 s/true/FormatStyle::SortUsingDeclarationsOptions::SUD_Lexicographic/' src/plugins/clangformat/clangformatutils.cpp
+        sed -i '169 s/style.SpaceInEmptyParentheses = false;//' src/plugins/clangformat/clangformatutils.cpp
+        sed -i '
         
         MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
         cmake . -Wno-dev                              \
