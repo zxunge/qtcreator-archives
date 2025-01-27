@@ -35,8 +35,8 @@ jobs:
           mingw-w64-i686-qt5-imageformats
           mingw-w64-i686-qt5-translations
           mingw-w64-i686-clang-libs
-          mingw-w64-i686-clang
-          mingw-w64-i686-llvm
+          mingw-w64-i686-clang-14
+          mingw-w64-i686-llvm-14
           mingw-w64-i686-llvm-libs
           mingw-w64-i686-clang-tools-extra
           mingw-w64-i686-ninja
