@@ -39,22 +39,26 @@ jobs:
           mingw-w64-i686-clang-tools-extra
           mingw-w64-i686-ninja
           mingw-w64-i686-python
+          mingw-w64-i686-clang
+          mingw-w64-i686-llvm
           base-devel
 #          mingw-w64-i686-litehtml
-#          mingw-w64-i686-clang-14
-#          mingw-w64-i686-llvm-14
      
     - name: Build
       shell: msys2 {0}
       run: |
-        wget -q https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-clang-14-14.0.6-1-any.pkg.tar.zst
-        wget -q https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-llvm-14-14.0.6-1-any.pkg.tar.zst
-        pacman -U --noconfirm mingw-w64-i686-llvm-14-14.0.6-1-any.pkg.tar.zst mingw-w64-i686-clang-14-14.0.6-1-any.pkg.tar.zst
+        #wget -q https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-clang-14-14.0.6-1-any.pkg.tar.zst
+        #wget -q https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-llvm-14-14.0.6-1-any.pkg.tar.zst
+        #pacman -U --noconfirm mingw-w64-i686-llvm-14-14.0.6-1-any.pkg.tar.zst mingw-w64-i686-clang-14-14.0.6-1-any.pkg.tar.zst
         
         cp -f psapi.h /mingw32/include/
         wget -q https://download.qt.io/archive/qtcreator/8.0/8.0.2/qt-creator-opensource-src-8.0.2.tar.gz
         tar xzf qt-creator-opensource-src-8.0.2.tar.gz
         cd qt-creator-opensource-src-8.0.2/
+        
+        # Patch
+        sed -i '60 s/false/SUD_Never/' src/plugins/clangformat/clangformatbaseindenter.cpp
+        
         MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
         cmake . -Wno-dev                              \
           -GNinja                               \
