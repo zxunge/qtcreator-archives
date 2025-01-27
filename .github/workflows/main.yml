@@ -58,7 +58,7 @@ jobs:
         
         # Patch
         sed -i '60 s/false/clang::format::FormatStyle::SortUsingDeclarationsOptions::SUD_Never/' src/plugins/clangformat/clangformatbaseindenter.cpp
-        sed -i '64 s/*/style.AlignTrailingComments.Kind = clang::format::FormatStyle::TrailingCommentsAlignmentKinds::TCAS_Never;/' src/plugins/clangformat/clangformatbaseindenter.cpp
+        sed -i '64 s/style.AlignTrailingComments = false;/style.AlignTrailingComments.Kind = clang::format::FormatStyle::TrailingCommentsAlignmentKinds::TCAS_Never;/' src/plugins/clangformat/clangformatbaseindenter.cpp
         sed -i '77 s/startswith/starts_with/' src/plugins/clangformat/clangformatbaseindenter.cpp
         
         MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
