@@ -57,7 +57,8 @@ jobs:
         cd qt-creator-opensource-src-8.0.2/
         
         # Patch
-        sed -i '60 s/false/SUD_Never/' src/plugins/clangformat/clangformatbaseindenter.cpp
+        sed -i '60 s/false/clang::format::FormatStyle::SortUsingDeclarationsOptions::SUD_Never/' src/plugins/clangformat/clangformatbaseindenter.cpp
+        sed -i '64 s/*/clang::format::FormatStyle::TrailingCommentsAlignmentStyle tcas {.Kind = clang::format::FormatStyle::TrailingCommentsAlignmentKinds::TCAS_Never};style.AlignTrailingComments = tcas;/' src/plugins/clangformat/clangformatbaseindenter.cpp
         
         MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
         cmake . -Wno-dev                              \
