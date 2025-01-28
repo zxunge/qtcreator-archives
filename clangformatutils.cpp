@@ -55,23 +55,27 @@ clang::format::FormatStyle qtcStyle()
     style.Language = FormatStyle::LK_Cpp;
     style.AccessModifierOffset = -4;
     style.AlignAfterOpenBracket = FormatStyle::BAS_Align;
-#if LLVM_VERSION_MAJOR >= 15
-    style.AlignConsecutiveAssignments = {false};
-    style.AlignConsecutiveDeclarations = {false};
-#elif LLVM_VERSION_MAJOR >= 12
+    style.AlignEscapedNewlines = FormatStyle::ENAS_DontAlign;
+#if LLVM_VERSION_MAJOR >= 18
+    style.AlignConsecutiveAssignments = {false, false, false, false, false, false};
+    style.AlignConsecutiveDeclarations = {false, false, false, false, false, false};
+#elif LLVM_VERSION_MAJOR >= 15
+    style.AlignConsecutiveAssignments = {false, false, false, false, false};
+    style.AlignConsecutiveDeclarations = {false, false, false, false, false};
+#else
     style.AlignConsecutiveAssignments = FormatStyle::ACS_None;
     style.AlignConsecutiveDeclarations = FormatStyle::ACS_None;
-#else
-    style.AlignConsecutiveAssignments = false;
-    style.AlignConsecutiveDeclarations = false;
 #endif
-    style.AlignEscapedNewlines = FormatStyle::ENAS_DontAlign;
 #if LLVM_VERSION_MAJOR >= 11
     style.AlignOperands = FormatStyle::OAS_Align;
 #else
     style.AlignOperands = true;
 #endif
+#if LLVM_VERSION_MAJOR >= 16
+    style.AlignTrailingComments = {FormatStyle::TCAS_Always, 0};
+#else
     style.AlignTrailingComments = true;
+#endif
     style.AllowAllParametersOfDeclarationOnNextLine = true;
 #if LLVM_VERSION_MAJOR >= 10
     style.AllowShortBlocksOnASingleLine = FormatStyle::SBS_Never;
@@ -86,9 +90,8 @@ clang::format::FormatStyle qtcStyle()
     style.AllowShortIfStatementsOnASingleLine = false;
 #endif
     style.AllowShortLoopsOnASingleLine = false;
-    style.AlwaysBreakAfterReturnType = FormatStyle::RTBS_None;
+    
     style.AlwaysBreakBeforeMultilineStrings = false;
-    style.AlwaysBreakTemplateDeclarations = FormatStyle::BTDS_Yes;
     style.BinPackArguments = false;
     style.BinPackParameters = false;
     style.BraceWrapping.AfterClass = true;
