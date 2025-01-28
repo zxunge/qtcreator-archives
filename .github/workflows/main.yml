@@ -80,7 +80,7 @@ jobs:
           -DBUILD_QBS=OFF            \
           -DPython3_EXECUTABLE=/mingw32/bin/python \
           -DWITH_TESTS=OFF           \
-          -DCLANGTOOLING_LINK_CLANG_DYLIB=ON       
+          -DCLANGTOOLING_LINK_CLANG_DYLIB=OFF      
           #-DCMAKE_CXX_COMPILER=clang++             \
           #-DCMAKE_C_COMPILER=clang
         cmake --build . --parallel $(nproc)
