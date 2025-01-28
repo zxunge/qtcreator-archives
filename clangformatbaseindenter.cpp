@@ -57,11 +57,19 @@ void adjustFormatStyleForLineBreak(clang::format::FormatStyle &style,
 #else
     style.SortIncludes = false;
 #endif
+#if LLVM_VERSION_MAJOR >= 16
+    style.SortUsingDeclarations = clang::format::FormatStyle::SUD_Never;
+#else
     style.SortUsingDeclarations = false;
+#endif
 
     // This is a separate pass, don't do it unless it's the full formatting.
     style.FixNamespaceComments = false;
+#if LLVM_VERSION_MAJOR >= 16
+    style.AlignTrailingComments = {clang::format::FormatStyle::TCAS_Never, 0};
+#else
     style.AlignTrailingComments = false;
+#endif
 
     if (replacementsToKeep == ReplacementsToKeep::IndentAndBefore)
         return;
@@ -74,7 +82,11 @@ void adjustFormatStyleForLineBreak(clang::format::FormatStyle &style,
 
 llvm::StringRef clearExtraNewline(llvm::StringRef text)
 {
+#if LLVM_VERSION_MAJOR >= 16
+    while (text.starts_with("\n\n"))
+#else
     while (text.startswith("\n\n"))
+#endif
         text = text.drop_front();
     return text;
 }
