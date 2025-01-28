@@ -90,7 +90,13 @@ clang::format::FormatStyle qtcStyle()
     style.AllowShortIfStatementsOnASingleLine = false;
 #endif
     style.AllowShortLoopsOnASingleLine = false;
-    
+#if LLVM_VERSION_MAJOR >= 19
+    style.BreakAfterReturnType = FormatStyle::RTBS_None;
+    style.BreakTemplateDeclarations = FormatStyle::BTDS_Yes;
+#else
+    style.AlwaysBreakAfterReturnType = FormatStyle::RTBS_None;
+    style.AlwaysBreakTemplateDeclarations = FormatStyle::BTDS_Yes;
+#endif
     style.AlwaysBreakBeforeMultilineStrings = false;
     style.BinPackArguments = false;
     style.BinPackParameters = false;
@@ -121,7 +127,11 @@ clang::format::FormatStyle qtcStyle()
     style.ColumnLimit = 100;
     style.CommentPragmas = "^ IWYU pragma:";
     style.CompactNamespaces = false;
+#if LLVM_VERSION_MAJOR >= 15
+    style.PackConstructorInitializers = FormatStyle::PCIS_BinPack;
+#else
     style.ConstructorInitializerAllOnOneLineOrOnePerLine = false;
+#endif
     style.ConstructorInitializerIndentWidth = 4;
     style.ContinuationIndentWidth = 4;
     style.Cpp11BracedListStyle = true;
@@ -141,7 +151,11 @@ clang::format::FormatStyle qtcStyle()
     style.IndentWrappedFunctionNames = false;
     style.JavaScriptQuotes = FormatStyle::JSQS_Leave;
     style.JavaScriptWrapImports = true;
+#if LLVM_VERSION_MAJOR >= 19
+    style.KeepEmptyLines = {false, false, false};
+#else
     style.KeepEmptyLinesAtTheStartOfBlocks = false;
+#endif
     // Do not add QT_BEGIN_NAMESPACE/QT_END_NAMESPACE as this will indent lines in between.
     style.MacroBlockBegin = "";
     style.MacroBlockEnd = "";
@@ -158,18 +172,28 @@ clang::format::FormatStyle qtcStyle()
     style.PenaltyExcessCharacter = 50;
     style.PenaltyReturnTypeOnItsOwnLine = 300;
     style.PointerAlignment = FormatStyle::PAS_Right;
+#if LLVM_VERSION_MAJOR >= 20
+    style.ReflowComments = FormatStyle::RCS_Never;
+#else
     style.ReflowComments = false;
+#endif
 #if LLVM_VERSION_MAJOR >= 13
     style.SortIncludes = FormatStyle::SI_CaseSensitive;
 #else
     style.SortIncludes = true;
 #endif
+#if LLVM_VERSION_MAJOR >= 16
+    style.SortUsingDeclarations = FormatStyle::SUD_Lexicographic;
+#else
     style.SortUsingDeclarations = true;
+#endif
     style.SpaceAfterCStyleCast = true;
     style.SpaceAfterTemplateKeyword = false;
     style.SpaceBeforeAssignmentOperators = true;
     style.SpaceBeforeParens = FormatStyle::SBPO_ControlStatements;
+#if LLVM_VERSION_MAJOR < 17
     style.SpaceInEmptyParentheses = false;
+#endif
     style.SpacesBeforeTrailingComments = 1;
 #if LLVM_VERSION_MAJOR >= 13
     style.SpacesInAngles = FormatStyle::SIAS_Never;
@@ -177,8 +201,12 @@ clang::format::FormatStyle qtcStyle()
     style.SpacesInAngles = false;
 #endif
     style.SpacesInContainerLiterals = false;
+#if LLVM_VERSION_MAJOR >= 17
+    style.SpacesInParens = FormatStyle::SIPO_Never;
+#else
     style.SpacesInCStyleCastParentheses = false;
     style.SpacesInParentheses = false;
+#endif
     style.SpacesInSquareBrackets = false;
     style.StatementMacros.emplace_back("Q_OBJECT");
     style.StatementMacros.emplace_back("QT_BEGIN_NAMESPACE");
