@@ -57,7 +57,7 @@ jobs:
         cd qt-creator-opensource-src-8.0.2/
         
         # Patch
-        cp -f ../clangformatbaseindenter.cpp ../clangformatutils.cpp src/plugins/clangformat/
+        #cp -f ../clangformatbaseindenter.cpp ../clangformatutils.cpp src/plugins/clangformat/
         #sed -i '60 s/false/clang::format::FormatStyle::SortUsingDeclarationsOptions::SUD_Never/' src/plugins/clangformat/clangformatbaseindenter.cpp
         #sed -i '64 s/style.AlignTrailingComments = false;/style.AlignTrailingComments.Kind = clang::format::FormatStyle::TrailingCommentsAlignmentKinds::TCAS_Never;/' src/plugins/clangformat/clangformatbaseindenter.cpp
         #sed -i '77 s/startswith/starts_with/' src/plugins/clangformat/clangformatbaseindenter.cpp
@@ -69,6 +69,8 @@ jobs:
         #sed -i '164 s/true/FormatStyle::SortUsingDeclarationsOptions::SUD_Lexicographic/' src/plugins/clangformat/clangformatutils.cpp
         #sed -i '169 s/style.SpaceInEmptyParentheses = false;//' src/plugins/clangformat/clangformatutils.cpp
         #sed -i '
+        rm -rf src/plugins/clangformat
+        cp -r ../clangformat src/plugins/
         
         MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
         cmake . -Wno-dev                              \
