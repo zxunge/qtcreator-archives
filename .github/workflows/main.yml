@@ -47,6 +47,7 @@ jobs:
     - name: Build
       shell: msys2 {0}
       run: |
+        ls /mingw32/lib | grep LLVM-19
         #wget -q https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-clang-14-14.0.6-1-any.pkg.tar.zst
         #wget -q https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-llvm-14-14.0.6-1-any.pkg.tar.zst
         #pacman -U --noconfirm mingw-w64-i686-llvm-14-14.0.6-1-any.pkg.tar.zst mingw-w64-i686-clang-14-14.0.6-1-any.pkg.tar.zst
