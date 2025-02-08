@@ -36,6 +36,7 @@
 #include <texteditor/texteditorsettings.h>
 
 #include <clang/Tooling/Core/Replacement.h>
+#include <llvm/Support/Error.h>
 
 #include <utils/algorithm.h>
 #include <utils/fileutils.h>
