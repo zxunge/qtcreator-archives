@@ -46,6 +46,7 @@ jobs:
         cd qt-creator-opensource-src-8.0.2/
         
         # Patch
+        cp -f ../CMakeLists.txt src/plugins/
         cp -f ../clangformatbaseindenter.cpp ../clangformatutils.h ../clangformatutils.cpp src/plugins/clangformat/
         #sed -i '60 s/false/clang::format::FormatStyle::SortUsingDeclarationsOptions::SUD_Never/' src/plugins/clangformat/clangformatbaseindenter.cpp
         #sed -i '64 s/style.AlignTrailingComments = false;/style.AlignTrailingComments.Kind = clang::format::FormatStyle::TrailingCommentsAlignmentKinds::TCAS_Never;/' src/plugins/clangformat/clangformatbaseindenter.cpp
