@@ -2,8 +2,8 @@ name: windows-msys2
 
 on:
   workflow_dispatch:
-  push:
-  pull_request:
+  #push:
+  #pull_request:
 
 jobs:
   msys2:
@@ -84,8 +84,8 @@ jobs:
           -DBUILD_QBS=OFF            \
           -DPython3_EXECUTABLE=/mingw32/bin/python \
           -DWITH_TESTS=OFF           \
-          -DCLANGTOOLING_LINK_CLANG_DYLIB=ON       \
-          -DCMAKE_SHARED_LINKER_FLAGS=D:/msys64/mingw32/lib/libLLVM-19.dll.a
+          -DCLANGTOOLING_LINK_CLANG_DYLIB=ON       
+          #-DCMAKE_SHARED_LINKER_FLAGS=D:/msys64/mingw32/lib/libLLVM-19.dll.a
           #-DCMAKE_CXX_COMPILER=clang++             \
           #-DCMAKE_C_COMPILER=clang
         cmake --build . --parallel $(nproc)
