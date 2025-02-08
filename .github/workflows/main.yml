@@ -47,7 +47,6 @@ jobs:
     - name: Build
       shell: msys2 {0}
       run: |
-        ls /mingw32/lib | grep LLVM-19
         #wget -q https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-clang-14-14.0.6-1-any.pkg.tar.zst
         #wget -q https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-llvm-14-14.0.6-1-any.pkg.tar.zst
         #pacman -U --noconfirm mingw-w64-i686-llvm-14-14.0.6-1-any.pkg.tar.zst mingw-w64-i686-clang-14-14.0.6-1-any.pkg.tar.zst
@@ -58,7 +57,7 @@ jobs:
         cd qt-creator-opensource-src-8.0.2/
         
         # Patch
-        cp -f ../clangformatbaseindenter.cpp ../clangformatutils.cpp src/plugins/clangformat/
+        cp -f ../clangformatbaseindenter.cpp ../clangformatutils.h ../clangformatutils.cpp src/plugins/clangformat/
         #sed -i '60 s/false/clang::format::FormatStyle::SortUsingDeclarationsOptions::SUD_Never/' src/plugins/clangformat/clangformatbaseindenter.cpp
         #sed -i '64 s/style.AlignTrailingComments = false;/style.AlignTrailingComments.Kind = clang::format::FormatStyle::TrailingCommentsAlignmentKinds::TCAS_Never;/' src/plugins/clangformat/clangformatbaseindenter.cpp
         #sed -i '77 s/startswith/starts_with/' src/plugins/clangformat/clangformatbaseindenter.cpp
