@@ -78,7 +78,7 @@ jobs:
           #-DCMAKE_CXX_COMPILER=clang++             \
           #-DCMAKE_C_COMPILER=clang
         cmake --build . --parallel $(nproc)
-        cmake --build . --target docs
+        #cmake --build . --target docs
         cmake --install .
 
     - name: Upload artifact
