@@ -37,7 +37,7 @@ jobs:
       run: |
         # Install Dependencies
         wget -q https://github.com/zxunge/mingw-package-archives/archive/refs/tags/v1.0.tar.gz
-        tar xzf mingw-package-archives-1.0.tar.gz
+        tar xzf *.tar.gz
         pacman -U --noconfirm mingw-package-archives-1.0/*.pkg.tar.zst
         
         cp -f psapi.h /mingw32/include/
