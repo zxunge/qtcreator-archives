@@ -36,21 +36,9 @@ jobs:
       shell: msys2 {0}
       run: |
         # Install Dependencies
-        wget -q https://github.com/zxunge/mingw-package-archives/blob/main/mingw-w64-i686-qt5-base-5.15.16%2Bkde%2Br130-2-any.pkg.tar.zst
-        wget -q https://github.com/zxunge/mingw-package-archives/blob/main/mingw-w64-i686-qt5-declarative-5.15.16%2Bkde%2Br22-1-any.pkg.tar.zst
-        wget -q https://github.com/zxunge/mingw-package-archives/blob/main/mingw-w64-i686-qt5-imageformats-5.15.16-1-any.pkg.tar.zst
-        wget -q https://github.com/zxunge/mingw-package-archives/blob/main/mingw-w64-i686-qt5-location-5.15.16%2Bkde%2Br7-1-any.pkg.tar.zst
-        wget -q https://github.com/zxunge/mingw-package-archives/blob/main/mingw-w64-i686-qt5-multimedia-5.15.16-1-any.pkg.tar.zst
-        wget -q https://github.com/zxunge/mingw-package-archives/blob/main/mingw-w64-i686-qt5-sensors-5.15.16-1-any.pkg.tar.zst
-        wget -q https://github.com/zxunge/mingw-package-archives/blob/main/mingw-w64-i686-qt5-speech-5.15.16-1-any.pkg.tar.zst
-        wget -q https://github.com/zxunge/mingw-package-archives/blob/main/mingw-w64-i686-qt5-svg-5.15.16%2Bkde%2Br5-1-any.pkg.tar.zst
-        wget -q https://github.com/zxunge/mingw-package-archives/blob/main/mingw-w64-i686-qt5-tools-5.15.16-1-any.pkg.tar.zst
-        wget -q https://github.com/zxunge/mingw-package-archives/blob/main/mingw-w64-i686-qt5-translations-5.15.16-1-any.pkg.tar.zst
-        wget -q https://github.com/zxunge/mingw-package-archives/blob/main/mingw-w64-i686-qt5-webchannel-5.15.16%2Bkde%2Br3-1-any.pkg.tar.zst
-        wget -q https://github.com/zxunge/mingw-package-archives/blob/main/mingw-w64-i686-qt5-winextras-5.15.16-1-any.pkg.tar.zst
-        #wget -q https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-clang-14-14.0.6-1-any.pkg.tar.zst
-        #wget -q https://repo.msys2.org/mingw/mingw32/mingw-w64-i686-llvm-14-14.0.6-1-any.pkg.tar.zst
-        pacman -U --noconfirm *.pkg.tar.zst
+        wget -q https://github.com/zxunge/mingw-package-archives/archive/refs/tags/v1.0.tar.gz
+        tar xzf mingw-package-archives-1.0.tar.gz
+        pacman -U --noconfirm mingw-package-archives-1.0/*.pkg.tar.zst
         
         cp -f psapi.h /mingw32/include/
         wget -q https://download.qt.io/archive/qtcreator/8.0/8.0.2/qt-creator-opensource-src-8.0.2.tar.gz
