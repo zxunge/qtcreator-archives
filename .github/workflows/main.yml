@@ -45,7 +45,8 @@ jobs:
         # Patch
         cp -f ../psapi.h /mingw32/include/
         #cp -f ../CMakeLists.txt src/plugins/
-        cp -rf ../src ./
+        #cp -rf ../src ./
+        cp -f ../src/plugins/clangformat/CMakeLists.txt src/plugins/clangformat/
 
         export PATH=$PATH:/mingw64/bin
         cmake . -Wno-dev                        \
