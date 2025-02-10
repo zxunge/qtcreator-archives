@@ -28,7 +28,7 @@ jobs:
           mingw-w64-i686-clang
           mingw-w64-i686-llvm
           base-devel
-          #mingw-w64-x86_64-qt5-tools
+#         mingw-w64-x86_64-qt5-tools
      
     - name: Build
       shell: msys2 {0}
