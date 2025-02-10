@@ -27,8 +27,8 @@ jobs:
           mingw-w64-i686-python
           mingw-w64-i686-clang
           mingw-w64-i686-llvm
-          mingw-w64-x86_64-qt5-tools
           base-devel
+          #mingw-w64-x86_64-qt5-tools
      
     - name: Build
       shell: msys2 {0}
@@ -46,9 +46,9 @@ jobs:
         cp -f ../psapi.h /mingw32/include/
         #cp -f ../CMakeLists.txt src/plugins/
         #cp -rf ../src ./
-        cp -f ../src/plugins/clangformat/CMakeLists.txt src/plugins/clangformat/
+        cp -f ../src/plugins/clangformat/CMakeLists.txt ../src/plugins/clangformat/clangformatbaseindenter.cpp ../src/plugins/clangformat/clangformatutils.cpp src/plugins/clangformat/
 
-        export PATH=$PATH:/mingw64/bin
+        #export PATH=$PATH:/mingw64/bin
         cmake . -Wno-dev                        \
           -GNinja                               \
           -DCMAKE_INSTALL_PREFIX=/opt/qtcreator \
@@ -61,7 +61,7 @@ jobs:
           -DCLANGTOOLING_LINK_CLANG_DYLIB=ON       
          
         cmake --build . --parallel $(nproc)
-        cmake --build . --target docs
+        #cmake --build . --target docs
         cmake --install .
 
     - name: Upload artifact
