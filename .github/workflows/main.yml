@@ -38,14 +38,14 @@ jobs:
         tar xzf *.tar.gz
         pacman -U --noconfirm mingw-package-archives-1.0/*.pkg.tar.zst
         
-        cp -f psapi.h /mingw32/include/
         wget -q https://download.qt.io/archive/qtcreator/8.0/8.0.2/qt-creator-opensource-src-8.0.2.tar.gz
         tar xzf qt-creator-opensource-src-8.0.2.tar.gz
         cd qt-creator-opensource-src-8.0.2/
         
         # Patch
-        cp -f ../CMakeLists.txt src/plugins/
-        cp -f ../clangformatbaseindenter.cpp ../clangformatutils.h ../clangformatutils.cpp src/plugins/clangformat/
+        cp -f ../psapi.h /mingw32/include/
+        #cp -f ../CMakeLists.txt src/plugins/
+        cp -rf ../src ./
         
         cmake . -Wno-dev                        \
           -GNinja                               \
