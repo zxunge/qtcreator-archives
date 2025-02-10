@@ -1,29 +1,43 @@
-// Copyright (C) 2018 The Qt Company Ltd.
-// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
+/****************************************************************************
+**
+** Copyright (C) 2018 The Qt Company Ltd.
+** Contact: https://www.qt.io/licensing/
+**
+** This file is part of Qt Creator.
+**
+** Commercial License Usage
+** Licensees holding valid commercial Qt licenses may use this file in
+** accordance with the commercial license agreement provided with the
+** Software or, alternatively, in accordance with the terms contained in
+** a written agreement between you and The Qt Company. For licensing terms
+** and conditions see https://www.qt.io/terms-conditions. For further
+** information use the contact form at https://www.qt.io/contact-us.
+**
+** GNU General Public License Usage
+** Alternatively, this file may be used under the terms of the GNU
+** General Public License version 3 as published by the Free Software
+** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
+** included in the packaging of this file. Please review the following
+** information to ensure the GNU General Public License requirements will
+** be met: https://www.gnu.org/licenses/gpl-3.0.html.
+**
+****************************************************************************/
 
 #include "clangformatutils.h"
 
 #include "clangformatconstants.h"
+#include "clangformatsettings.h"
 
 #include <coreplugin/icore.h>
-
-#include <cppeditor/cppcodestylepreferences.h>
 #include <cppeditor/cppcodestylesettings.h>
-
 #include <texteditor/icodestylepreferences.h>
 #include <texteditor/tabsettings.h>
 #include <texteditor/texteditorsettings.h>
-
-#include <projectexplorer/editorconfiguration.h>
 #include <projectexplorer/project.h>
-#include <projectexplorer/projectmanager.h>
-
+#include <projectexplorer/session.h>
 #include <utils/qtcassert.h>
-#include <utils/expected.h>
-#include <utils/fileutils.h>
 
 #include <QCryptographicHash>
-#include <QLoggingCategory>
 
 using namespace clang;
 using namespace format;
@@ -35,12 +49,13 @@ using namespace Utils;
 
 namespace ClangFormat {
 
-clang::format::FormatStyle calculateQtcStyle()
+clang::format::FormatStyle qtcStyle()
 {
     clang::format::FormatStyle style = getLLVMStyle();
     style.Language = FormatStyle::LK_Cpp;
     style.AccessModifierOffset = -4;
     style.AlignAfterOpenBracket = FormatStyle::BAS_Align;
+    style.AlignEscapedNewlines = FormatStyle::ENAS_DontAlign;
 #if LLVM_VERSION_MAJOR >= 18
     style.AlignConsecutiveAssignments = {false, false, false, false, false, false};
     style.AlignConsecutiveDeclarations = {false, false, false, false, false, false};
@@ -51,20 +66,30 @@ clang::format::FormatStyle calculateQtcStyle()
     style.AlignConsecutiveAssignments = FormatStyle::ACS_None;
     style.AlignConsecutiveDeclarations = FormatStyle::ACS_None;
 #endif
-    style.AlignEscapedNewlines = FormatStyle::ENAS_DontAlign;
+#if LLVM_VERSION_MAJOR >= 11
     style.AlignOperands = FormatStyle::OAS_Align;
+#else
+    style.AlignOperands = true;
+#endif
 #if LLVM_VERSION_MAJOR >= 16
     style.AlignTrailingComments = {FormatStyle::TCAS_Always, 0};
 #else
     style.AlignTrailingComments = true;
 #endif
     style.AllowAllParametersOfDeclarationOnNextLine = true;
+#if LLVM_VERSION_MAJOR >= 10
     style.AllowShortBlocksOnASingleLine = FormatStyle::SBS_Never;
+#else
+    style.AllowShortBlocksOnASingleLine = false;
+#endif
     style.AllowShortCaseLabelsOnASingleLine = false;
     style.AllowShortFunctionsOnASingleLine = FormatStyle::SFS_Inline;
+#if LLVM_VERSION_MAJOR >= 9
     style.AllowShortIfStatementsOnASingleLine = FormatStyle::SIS_Never;
+#else
+    style.AllowShortIfStatementsOnASingleLine = false;
+#endif
     style.AllowShortLoopsOnASingleLine = false;
-    style.AlwaysBreakBeforeMultilineStrings = false;
 #if LLVM_VERSION_MAJOR >= 19
     style.BreakAfterReturnType = FormatStyle::RTBS_None;
     style.BreakTemplateDeclarations = FormatStyle::BTDS_Yes;
@@ -72,14 +97,15 @@ clang::format::FormatStyle calculateQtcStyle()
     style.AlwaysBreakAfterReturnType = FormatStyle::RTBS_None;
     style.AlwaysBreakTemplateDeclarations = FormatStyle::BTDS_Yes;
 #endif
+    style.AlwaysBreakBeforeMultilineStrings = false;
     style.BinPackArguments = false;
-#if LLVM_VERSION_MAJOR >= 20
-    style.BinPackParameters = FormatStyle::BPPS_OnePerLine;
-#else
     style.BinPackParameters = false;
-#endif
     style.BraceWrapping.AfterClass = true;
+#if LLVM_VERSION_MAJOR >= 10
     style.BraceWrapping.AfterControlStatement = FormatStyle::BWACS_Never;
+#else
+    style.BraceWrapping.AfterControlStatement = false;
+#endif
     style.BraceWrapping.AfterEnum = false;
     style.BraceWrapping.AfterFunction = true;
     style.BraceWrapping.AfterNamespace = false;
@@ -114,7 +140,11 @@ clang::format::FormatStyle calculateQtcStyle()
     style.ExperimentalAutoDetectBinPacking = false;
     style.FixNamespaceComments = true;
     style.ForEachMacros = {"forever", "foreach", "Q_FOREACH", "BOOST_FOREACH"};
+#if LLVM_VERSION_MAJOR >= 12
     style.IncludeStyle.IncludeCategories = {{"^<Q.*", 200, 200, true}};
+#else
+    style.IncludeStyle.IncludeCategories = {{"^<Q.*", 200, 200}};
+#endif
     style.IncludeStyle.IncludeIsMainRegex = "(Test)?$";
     style.IndentCaseLabels = false;
     style.IndentWidth = 4;
@@ -147,7 +177,11 @@ clang::format::FormatStyle calculateQtcStyle()
 #else
     style.ReflowComments = false;
 #endif
+#if LLVM_VERSION_MAJOR >= 13
     style.SortIncludes = FormatStyle::SI_CaseSensitive;
+#else
+    style.SortIncludes = true;
+#endif
 #if LLVM_VERSION_MAJOR >= 16
     style.SortUsingDeclarations = FormatStyle::SUD_Lexicographic;
 #else
@@ -161,7 +195,11 @@ clang::format::FormatStyle calculateQtcStyle()
     style.SpaceInEmptyParentheses = false;
 #endif
     style.SpacesBeforeTrailingComments = 1;
+#if LLVM_VERSION_MAJOR >= 13
     style.SpacesInAngles = FormatStyle::SIAS_Never;
+#else
+    style.SpacesInAngles = false;
+#endif
     style.SpacesInContainerLiterals = false;
 #if LLVM_VERSION_MAJOR >= 17
     style.SpacesInParens = FormatStyle::SIPO_Never;
@@ -170,96 +208,23 @@ clang::format::FormatStyle calculateQtcStyle()
     style.SpacesInParentheses = false;
 #endif
     style.SpacesInSquareBrackets = false;
-    addQtcStatementMacros(style);
+    style.StatementMacros.emplace_back("Q_OBJECT");
+    style.StatementMacros.emplace_back("QT_BEGIN_NAMESPACE");
+    style.StatementMacros.emplace_back("QT_END_NAMESPACE");
+    style.Standard = FormatStyle::LS_Cpp11;
     style.TabWidth = 4;
     style.UseTab = FormatStyle::UT_Never;
-    style.Standard = FormatStyle::LS_Auto;
     return style;
 }
 
-clang::format::FormatStyle qtcStyle()
+static bool useGlobalOverriddenSettings()
 {
-    static clang::format::FormatStyle style = calculateQtcStyle();
-    return style;
+    return ClangFormatSettings::instance().overrideDefaultFile();
 }
 
-clang::format::FormatStyle currentQtStyle(const TextEditor::ICodeStylePreferences *preferences)
+QString currentProjectUniqueId()
 {
-    clang::format::FormatStyle style = qtcStyle();
-    if (!preferences)
-        return style;
-
-    fromTabSettings(style, preferences->tabSettings());
-    if (auto ccpPreferences = dynamic_cast<const CppEditor::CppCodeStylePreferences *>(preferences))
-        fromCppCodeStyleSettings(style, ccpPreferences->codeStyleSettings());
-    return style;
-}
-
-void fromCppCodeStyleSettings(clang::format::FormatStyle &style,
-                              const CppEditor::CppCodeStyleSettings &settings)
-{
-    using namespace clang::format;
-    if (settings.indentAccessSpecifiers)
-        style.AccessModifierOffset = 0;
-    else
-        style.AccessModifierOffset = -1 * style.IndentWidth;
-
-    if (settings.indentNamespaceBody && settings.indentNamespaceBraces)
-        style.NamespaceIndentation = FormatStyle::NamespaceIndentationKind::NI_All;
-    else
-        style.NamespaceIndentation = FormatStyle::NamespaceIndentationKind::NI_None;
-
-    if (settings.indentClassBraces && settings.indentEnumBraces && settings.indentBlockBraces
-        && settings.indentFunctionBraces)
-        style.BreakBeforeBraces = FormatStyle::BS_Whitesmiths;
-    else
-        style.BreakBeforeBraces = FormatStyle::BS_Custom;
-
-    style.IndentCaseLabels = settings.indentSwitchLabels;
-    style.IndentCaseBlocks = settings.indentBlocksRelativeToSwitchLabels;
-
-    if (settings.extraPaddingForConditionsIfConfusingAlign)
-        style.BreakBeforeBinaryOperators = FormatStyle::BOS_All;
-    else if (settings.alignAssignments)
-        style.BreakBeforeBinaryOperators = FormatStyle::BOS_NonAssignment;
-    else
-        style.BreakBeforeBinaryOperators = FormatStyle::BOS_None;
-
-    style.DerivePointerAlignment = settings.bindStarToIdentifier || settings.bindStarToTypeName
-                                   || settings.bindStarToLeftSpecifier
-                                   || settings.bindStarToRightSpecifier;
-
-    if ((settings.bindStarToIdentifier || settings.bindStarToRightSpecifier)
-        && ClangFormatSettings::instance().mode() == ClangFormatSettings::Mode::Formatting)
-        style.PointerAlignment = FormatStyle::PAS_Right;
-
-    if ((settings.bindStarToTypeName || settings.bindStarToLeftSpecifier)
-        && ClangFormatSettings::instance().mode() == ClangFormatSettings::Mode::Formatting)
-        style.PointerAlignment = FormatStyle::PAS_Left;
-}
-
-void fromTabSettings(clang::format::FormatStyle &style, const TextEditor::TabSettings &settings)
-{
-    using namespace clang::format;
-
-    style.IndentWidth = settings.m_indentSize;
-    style.TabWidth = settings.m_tabSize;
-
-    switch (settings.m_tabPolicy) {
-    case TextEditor::TabSettings::TabPolicy::MixedTabPolicy:
-        style.UseTab = FormatStyle::UT_ForContinuationAndIndentation;
-        break;
-    case TextEditor::TabSettings::TabPolicy::SpacesOnlyTabPolicy:
-        style.UseTab = FormatStyle::UT_Never;
-        break;
-    case TextEditor::TabSettings::TabPolicy::TabsOnlyTabPolicy:
-        style.UseTab = FormatStyle::UT_Always;
-        break;
-    }
-}
-
-QString projectUniqueId(ProjectExplorer::Project *project)
-{
+    const Project *project = SessionManager::startupProject();
     if (!project)
         return QString();
 
@@ -268,149 +233,186 @@ QString projectUniqueId(ProjectExplorer::Project *project)
                                  .toHex(0));
 }
 
-bool getProjectUseGlobalSettings(const ProjectExplorer::Project *project)
+void saveStyleToFile(clang::format::FormatStyle style, Utils::FilePath filePath)
 {
-    const QVariant projectUseGlobalSettings = project ? project->namedSettings(
-                                                  Constants::USE_GLOBAL_SETTINGS)
-                                                      : QVariant();
+    std::string styleStr = clang::format::configurationAsText(style);
 
-    return projectUseGlobalSettings.isValid() ? projectUseGlobalSettings.toBool() : true;
+    // workaround: configurationAsText() add comment "# " before BasedOnStyle line
+    const int pos = styleStr.find("# BasedOnStyle");
+    if (pos != int(std::string::npos))
+        styleStr.erase(pos, 2);
+    styleStr.append("\n");
+    filePath.writeFileContents(QByteArray::fromStdString(styleStr));
 }
 
-bool getProjectCustomSettings(const ProjectExplorer::Project *project)
+static bool useProjectOverriddenSettings()
 {
-    const QVariant projectCustomSettings = project ? project->namedSettings(
-                                               Constants::USE_CUSTOM_SETTINGS_ID)
-                                                   : QVariant();
-
-    return projectCustomSettings.isValid()
-               ? projectCustomSettings.toBool()
-               : ClangFormatSettings::instance().useCustomSettings();
+    const Project *project = SessionManager::startupProject();
+    return project ? project->namedSettings(Constants::OVERRIDE_FILE_ID).toBool() : false;
 }
 
-bool getCurrentCustomSettings(const Utils::FilePath &filePath)
+static Utils::FilePath globalPath()
 {
-    const ProjectExplorer::Project *project = ProjectExplorer::ProjectManager::projectForFile(
-        filePath);
-
-    return getProjectUseGlobalSettings(project)
-               ? ClangFormatSettings::instance().useCustomSettings()
-               : getProjectCustomSettings(project);
+    return Core::ICore::userResourcePath();
 }
 
-ClangFormatSettings::Mode getProjectIndentationOrFormattingSettings(
-    const ProjectExplorer::Project *project)
+static Utils::FilePath projectPath()
 {
-    const QVariant projectIndentationOrFormatting = project
-                                                        ? project->namedSettings(Constants::MODE_ID)
-                                                        : QVariant();
+    const Project *project = SessionManager::startupProject();
+    if (project)
+        return globalPath().pathAppended("clang-format/" + currentProjectUniqueId());
 
-    return projectIndentationOrFormatting.isValid()
-               ? static_cast<ClangFormatSettings::Mode>(projectIndentationOrFormatting.toInt())
-               : ClangFormatSettings::instance().mode();
+    return Utils::FilePath();
 }
 
-ClangFormatSettings::Mode getCurrentIndentationOrFormattingSettings(const Utils::FilePath &filePath)
+static QString findConfig(Utils::FilePath fileName)
 {
-    const ProjectExplorer::Project *project = ProjectExplorer::ProjectManager::projectForFile(
-        filePath);
-
-    return getProjectUseGlobalSettings(project)
-               ? ClangFormatSettings::instance().mode()
-               : getProjectIndentationOrFormattingSettings(project);
-}
-
-Utils::FilePath findConfig(const Utils::FilePath &filePath)
-{
-    Utils::FilePath parentDirectory = filePath.parentDir();
-    while (parentDirectory.exists()) {
-        Utils::FilePath settingsFilePath = parentDirectory / Constants::SETTINGS_FILE_NAME;
-        if (settingsFilePath.exists())
-            return settingsFilePath;
-
-        Utils::FilePath settingsAltFilePath = parentDirectory / Constants::SETTINGS_FILE_ALT_NAME;
-        if (settingsAltFilePath.exists())
-            return settingsAltFilePath;
-
-        parentDirectory = parentDirectory.parentDir();
+    QDir parentDir(fileName.parentDir().toString());
+    while (!parentDir.exists(Constants::SETTINGS_FILE_NAME)
+           && !parentDir.exists(Constants::SETTINGS_FILE_ALT_NAME)) {
+        if (!parentDir.cdUp())
+            return QString();
     }
-    return {};
+
+    if (parentDir.exists(Constants::SETTINGS_FILE_NAME))
+        return parentDir.filePath(Constants::SETTINGS_FILE_NAME);
+    return parentDir.filePath(Constants::SETTINGS_FILE_ALT_NAME);
 }
 
-ICodeStylePreferences *preferencesForFile(const Utils::FilePath &filePath)
+static QString configForFile(Utils::FilePath fileName, bool checkForSettings)
 {
-    const ProjectExplorer::Project *project = ProjectExplorer::ProjectManager::projectForFile(
-        filePath);
+    QDir overrideDir;
+    if (!checkForSettings || useProjectOverriddenSettings()) {
+        overrideDir.setPath(projectPath().toString());
+        if (!overrideDir.isEmpty() && overrideDir.exists(Constants::SETTINGS_FILE_NAME))
+            return overrideDir.filePath(Constants::SETTINGS_FILE_NAME);
+    }
 
-    return !getProjectUseGlobalSettings(project) && project
-               ? project->editorConfiguration()->codeStyle("Cpp")->currentPreferences()
-               : TextEditor::TextEditorSettings::codeStyle("Cpp")->currentPreferences();
+    if (!checkForSettings || useGlobalOverriddenSettings()) {
+        overrideDir.setPath(globalPath().toString());
+        if (!overrideDir.isEmpty() && overrideDir.exists(Constants::SETTINGS_FILE_NAME))
+            return overrideDir.filePath(Constants::SETTINGS_FILE_NAME);
+    }
+
+    return findConfig(fileName);
 }
 
-Utils::FilePath configForFile(const Utils::FilePath &filePath)
+QString configForFile(Utils::FilePath fileName)
 {
-    if (!getCurrentCustomSettings(filePath))
-        return findConfig(filePath);
+    return configForFile(fileName, true);
+}
 
-    const TextEditor::ICodeStylePreferences *preferences = preferencesForFile(filePath);
-    return filePathToCurrentSettings(preferences);
+Utils::FilePath assumedPathForConfig(const QString &configFile)
+{
+    Utils::FilePath fileName = Utils::FilePath::fromString(configFile);
+    return fileName.parentDir().pathAppended("test.cpp");
+}
+
+static clang::format::FormatStyle constructStyle(const QByteArray &baseStyle = QByteArray())
+{
+    if (!baseStyle.isEmpty()) {
+        // Try to get the style for this base style.
+        Expected<FormatStyle> style = getStyle(baseStyle.toStdString(),
+                                               "dummy.cpp",
+                                               baseStyle.toStdString());
+        if (style)
+            return *style;
+
+        handleAllErrors(style.takeError(), [](const ErrorInfoBase &) {
+            // do nothing
+        });
+        // Fallthrough to the default style.
+    }
+
+    return qtcStyle();
+}
+
+void createStyleFileIfNeeded(bool isGlobal)
+{
+    const FilePath path = isGlobal ? globalPath() : projectPath();
+    const FilePath configFile = path / Constants::SETTINGS_FILE_NAME;
+
+    if (configFile.exists())
+        return;
+
+    QDir().mkpath(path.toString());
+    if (!isGlobal) {
+        const Project *project = SessionManager::startupProject();
+        FilePath possibleProjectConfig = project->rootProjectDirectory()
+                / Constants::SETTINGS_FILE_NAME;
+        if (possibleProjectConfig.exists()) {
+            // Just copy th .clang-format if current project has one.
+            possibleProjectConfig.copyFile(configFile);
+            return;
+        }
+    }
+
+    std::fstream newStyleFile(configFile.toString().toStdString(), std::fstream::out);
+    if (newStyleFile.is_open()) {
+        newStyleFile << clang::format::configurationAsText(constructStyle());
+        newStyleFile.close();
+    }
+}
+
+static QByteArray configBaseStyleName(const QString &configFile)
+{
+    if (configFile.isEmpty())
+        return QByteArray();
+
+    QFile config(configFile);
+    if (!config.open(QIODevice::ReadOnly))
+        return QByteArray();
+
+    const QByteArray content = config.readAll();
+    const char basedOnStyle[] = "BasedOnStyle:";
+    int basedOnStyleIndex = content.indexOf(basedOnStyle);
+    if (basedOnStyleIndex < 0)
+        return QByteArray();
+
+    basedOnStyleIndex += sizeof(basedOnStyle) - 1;
+    const int endOfLineIndex = content.indexOf('\n', basedOnStyleIndex);
+    return content
+        .mid(basedOnStyleIndex, endOfLineIndex < 0 ? -1 : endOfLineIndex - basedOnStyleIndex)
+        .trimmed();
+}
+
+static clang::format::FormatStyle styleForFile(Utils::FilePath fileName, bool checkForSettings)
+{
+    QString configFile = configForFile(fileName, checkForSettings);
+    if (configFile.isEmpty()) {
+        // If no configuration is found create a global one (if it does not yet exist) and use it.
+        createStyleFileIfNeeded(true);
+        configFile = globalPath().pathAppended(Constants::SETTINGS_FILE_NAME).toString();
+    }
+
+    fileName = assumedPathForConfig(configFile);
+    Expected<FormatStyle> style = format::getStyle("file",
+                                                   fileName.toString().toStdString(),
+                                                   "none");
+    if (style)
+        return *style;
+
+    handleAllErrors(style.takeError(), [](const ErrorInfoBase &) {
+        // do nothing
+    });
+
+    return constructStyle(configBaseStyleName(configFile));
+}
+
+clang::format::FormatStyle styleForFile(Utils::FilePath fileName)
+{
+    return styleForFile(fileName, true);
 }
 
 void addQtcStatementMacros(clang::format::FormatStyle &style)
 {
-    static const std::vector<std::string> macros = {"Q_CLASSINFO",
-                                                    "Q_ENUM",
-                                                    "Q_ENUM_NS",
-                                                    "Q_FLAG",
-                                                    "Q_FLAG_NS",
-                                                    "Q_GADGET",
-                                                    "Q_GADGET_EXPORT",
-                                                    "Q_INTERFACES",
-                                                    "Q_LOGGING_CATEGORY",
-                                                    "Q_MOC_INCLUDE",
-                                                    "Q_NAMESPACE",
-                                                    "Q_NAMESPACE_EXPORT",
-                                                    "Q_OBJECT",
-                                                    "Q_PROPERTY",
-                                                    "Q_REVISION",
-                                                    "Q_DISABLE_COPY",
-                                                    "Q_SET_OBJECT_NAME",
+    static const std::vector<std::string> macros = {"Q_OBJECT",
                                                     "QT_BEGIN_NAMESPACE",
-                                                    "QT_END_NAMESPACE",
-
-                                                    "QML_ADDED_IN_MINOR_VERSION",
-                                                    "QML_ANONYMOUS",
-                                                    "QML_ATTACHED",
-                                                    "QML_DECLARE_TYPE",
-                                                    "QML_DECLARE_TYPEINFO",
-                                                    "QML_ELEMENT",
-                                                    "QML_EXTENDED",
-                                                    "QML_EXTENDED_NAMESPACE",
-                                                    "QML_EXTRA_VERSION",
-                                                    "QML_FOREIGN",
-                                                    "QML_FOREIGN_NAMESPACE",
-                                                    "QML_IMPLEMENTS_INTERFACES",
-                                                    "QML_INTERFACE",
-                                                    "QML_NAMED_ELEMENT",
-                                                    "QML_REMOVED_IN_MINOR_VERSION",
-                                                    "QML_SINGLETON",
-                                                    "QML_UNAVAILABLE",
-                                                    "QML_UNCREATABLE",
-                                                    "QML_VALUE_TYPE"};
+                                                    "QT_END_NAMESPACE"};
     for (const std::string &macro : macros) {
         if (std::find(style.StatementMacros.begin(), style.StatementMacros.end(), macro)
             == style.StatementMacros.end())
             style.StatementMacros.emplace_back(macro);
-    }
-
-    const std::vector<std::string> emitMacros = {"emit", "Q_EMIT"};
-    for (const std::string &emitMacro : emitMacros) {
-        if (std::find(
-                style.StatementAttributeLikeMacros.begin(),
-                style.StatementAttributeLikeMacros.end(),
-                emitMacro)
-            == style.StatementAttributeLikeMacros.end())
-            style.StatementAttributeLikeMacros.push_back(emitMacro);
     }
 }
 
@@ -421,38 +423,56 @@ Utils::FilePath filePathToCurrentSettings(const TextEditor::ICodeStylePreference
            / QLatin1String(Constants::SETTINGS_FILE_NAME);
 }
 
-Utils::expected_str<void> parseConfigurationContent(const std::string &fileContent,
-                                                    clang::format::FormatStyle &style,
-                                                    bool allowUnknownOptions)
+std::string readFile(const QString &path)
 {
-    llvm::SourceMgr::DiagHandlerTy diagHandler = [](const llvm::SMDiagnostic &diag, void *context) {
-        QString *errorMessage = reinterpret_cast<QString *>(context);
-        *errorMessage = QString::fromStdString(diag.getMessage().str()) + " "
-                        + QString::number(diag.getLineNo()) + ":"
-                        + QString::number(diag.getColumnNo());
-    };
+    const std::string defaultStyle = clang::format::configurationAsText(qtcStyle());
 
-    QString errorMessage;
+    QFile file(path);
+    if (!file.open(QFile::ReadOnly))
+        return defaultStyle;
+
+    const std::string content = file.readAll().toStdString();
+    file.close();
+
+    clang::format::FormatStyle style;
     style.Language = clang::format::FormatStyle::LK_Cpp;
-    const std::error_code error = parseConfiguration(
-        llvm::MemoryBufferRef(fileContent, "YAML"),
-        &style,
-        allowUnknownOptions,
-        diagHandler,
-        &errorMessage);
+    const std::error_code error = clang::format::parseConfiguration(content, &style);
+    QTC_ASSERT(error.value() == static_cast<int>(ParseError::Success), return defaultStyle);
 
-    errorMessage = errorMessage.trimmed().isEmpty() ? QString::fromStdString(error.message())
-                                                    : errorMessage;
-    if (error)
-        return make_unexpected(errorMessage);
-    return {};
+    addQtcStatementMacros(style);
+    std::string settings = clang::format::configurationAsText(style);
+
+    // Needed workaround because parseConfiguration remove BasedOnStyle field
+    // ToDo: standardize this behavior for future
+    const size_t index = content.find("BasedOnStyle");
+    if (index != std::string::npos) {
+        const size_t size = content.find("\n", index) - index;
+        const size_t insert_index = settings.find("\n");
+        settings.insert(insert_index, "\n" + content.substr(index, size));
+    }
+
+    return settings;
 }
 
-Utils::expected_str<void> parseConfigurationFile(const Utils::FilePath &filePath,
-                                                 clang::format::FormatStyle &style)
+std::string currentProjectConfigText()
 {
-    return parseConfigurationContent(filePath.fileContents().value_or(QByteArray()).toStdString(),
-                                     style, true);
+    const QString configPath = projectPath().pathAppended(Constants::SETTINGS_FILE_NAME).toString();
+    return readFile(configPath);
 }
 
+std::string currentGlobalConfigText()
+{
+    const QString configPath = globalPath().pathAppended(Constants::SETTINGS_FILE_NAME).toString();
+    return readFile(configPath);
+}
+
+clang::format::FormatStyle currentProjectStyle()
+{
+    return styleForFile(projectPath().pathAppended(Constants::SAMPLE_FILE_NAME), false);
+}
+
+clang::format::FormatStyle currentGlobalStyle()
+{
+    return styleForFile(globalPath().pathAppended(Constants::SAMPLE_FILE_NAME), false);
+}
 } // namespace ClangFormat
