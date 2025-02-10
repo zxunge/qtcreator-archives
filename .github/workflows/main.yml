@@ -61,6 +61,7 @@ jobs:
           -DCLANGTOOLING_LINK_CLANG_DYLIB=ON       
          
         cmake --build . --parallel $(nproc)
+        export PATH=/mingw64/bin:$PATH
         cmake --build . --target docs
         cmake --install .
 
