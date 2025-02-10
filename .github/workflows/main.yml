@@ -27,6 +27,7 @@ jobs:
           mingw-w64-i686-python
           mingw-w64-i686-clang
           mingw-w64-i686-llvm
+          mingw-w64-x86_64-qt5-tools
           base-devel
      
     - name: Build
@@ -45,7 +46,8 @@ jobs:
         cp -f ../psapi.h /mingw32/include/
         #cp -f ../CMakeLists.txt src/plugins/
         cp -rf ../src ./
-        
+
+        export PATH=$PATH:/mingw64/bin
         cmake . -Wno-dev                        \
           -GNinja                               \
           -DCMAKE_INSTALL_PREFIX=/opt/qtcreator \
@@ -58,6 +60,7 @@ jobs:
           -DCLANGTOOLING_LINK_CLANG_DYLIB=ON       
          
         cmake --build . --parallel $(nproc)
+        cmake --build . --target docs
         cmake --install .
 
     - name: Upload artifact
