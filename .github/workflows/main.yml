@@ -75,11 +75,6 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - uses: actions/download-artifact@v4
-      with:
-        name: qtbuild
-        path: D:\msys64\opt\
-        
     - name: Setup MSYS2 Environment
       uses: msys2/setup-msys2@v2
       with:
@@ -92,6 +87,11 @@ jobs:
           mingw-w64-x86_64-python
           base-devel
           mingw-w64-x86_64-qt5-tools
+
+    - uses: actions/download-artifact@v4
+      with:
+        name: qtbuild
+        path: D:\msys64\opt\
 
     - name: Build
       shell: msys2 {0}
