@@ -33,6 +33,8 @@ jobs:
     - name: Build
       shell: msys2 {0}
       run: |
+        cd /opt
+        mkdir build && cd $_
         # Install Dependencies
         wget -q https://github.com/zxunge/mingw-package-archives/archive/refs/tags/v1.0.tar.gz
         tar xzf *.tar.gz
@@ -61,7 +63,39 @@ jobs:
           -DCLANGTOOLING_LINK_CLANG_DYLIB=ON       
          
         cmake --build . --parallel $(nproc)
-        export PATH=/mingw64/bin:$PATH
+        
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: qtbuild
+        path: D:\msys64\opt\build
+
+  msys2-again:
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: qtbuild
+        path: D:\msys64\opt\
+        
+    - name: Setup MSYS2 Environment
+      uses: msys2/setup-msys2@v2
+      with:
+        msystem: mingw64
+        location: D:\
+        update: true
+        install: >-
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-ninja
+          mingw-w64-x86_64-python
+          base-devel
+          mingw-w64-x86_64-qt5-tools
+
+    - name: Build
+      shell: msys2 {0}
+      run: |
+        cd /opt/build
         cmake --build . --target docs
         cmake --install .
 
