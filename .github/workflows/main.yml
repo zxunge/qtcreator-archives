@@ -71,6 +71,7 @@ jobs:
         path: D:\msys64\opt\build
 
   msys2-again:
+    needs: msys2
     runs-on: windows-latest
 
     steps:
