@@ -11,21 +11,21 @@ jobs:
     - name: Setup MSYS2 Environment
       uses: msys2/setup-msys2@v2
       with:
-        msystem: mingw32
+        msystem: ucrt64
         location: D:\
         update: true
         install: >-
-          mingw-w64-i686-toolchain
-          mingw-w64-i686-cmake
-          mingw-w64-i686-clang-libs
-          mingw-w64-i686-llvm-libs
-          mingw-w64-i686-clang-tools-extra
-          mingw-w64-i686-ninja
-          mingw-w64-i686-python
-          mingw-w64-i686-clang
-          mingw-w64-i686-llvm
+          mingw-w64-ucrt64-toolchain
+          mingw-w64-ucrt64-cmake
+          mingw-w64-ucrt64-clang-libs
+          mingw-w64-ucrt64-llvm-libs
+          mingw-w64-ucrt64-clang-tools-extra
+          mingw-w64-ucrt64-ninja
+          mingw-w64-ucrt64-python
+          mingw-w64-ucrt64-clang
+          mingw-w64-ucrt64-llvm
           base-devel
-          mingw-w64-x86_64-qt5-tools
+          mingw-w64-ucrt64-qt5
 
     - name: Checkout
       uses: actions/checkout@v4
@@ -38,21 +38,20 @@ jobs:
         cd /opt
         mkdir build && cd $_
         # Install Dependencies
-        wget -q https://github.com/zxunge/mingw-package-archives/archive/refs/tags/v1.0.tar.gz
-        tar xzf *.tar.gz
-        pacman -U --noconfirm mingw-package-archives-1.0/*.pkg.tar.zst
+        #wget -q https://github.com/zxunge/mingw-package-archives/archive/refs/tags/v1.0.tar.gz
+        #tar xzf *.tar.gz
+        #pacman -U --noconfirm mingw-package-archives-1.0/*.pkg.tar.zst
         
         wget -q https://download.qt.io/archive/qtcreator/8.0/8.0.2/qt-creator-opensource-src-8.0.2.tar.gz
         tar xzf qt-creator-opensource-src-8.0.2.tar.gz
         cd qt-creator-opensource-src-8.0.2/
         
         # Patch
-        cp -f ../psapi.h /mingw32/include/
+        cp -f ../psapi.h /ucrt64/include/
         #cp -f ../CMakeLists.txt src/plugins/
         #cp -rf ../src ./
         cp -f ../src/plugins/clangformat/CMakeLists.txt ../src/plugins/clangformat/clangformatbaseindenter.cpp ../src/plugins/clangformat/clangformatutils.cpp src/plugins/clangformat/
 
-        export PATH=$PATH:/mingw64/bin
         cmake . -Wno-dev                        \
           -GNinja                               \
           -DCMAKE_INSTALL_PREFIX=/opt/qtcreator \
@@ -60,48 +59,14 @@ jobs:
           -DBUILD_DEVELOPER_DOCS=ON  \
           -DCMAKE_BUILD_TYPE=Release \
           -DBUILD_QBS=OFF            \
-          -DPython3_EXECUTABLE=/mingw32/bin/python \
+          -DPython3_EXECUTABLE=/ucrt64/bin/python \
           -DWITH_TESTS=OFF           \
           -DCLANGTOOLING_LINK_CLANG_DYLIB=ON       
          
         cmake --build . --parallel $(nproc)
-        
-    - name: Upload artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: qtbuild
-        path: D:\msys64\opt\build
-
-  msys2-again:
-    needs: msys2
-    runs-on: windows-latest
-
-    steps:
-    - name: Setup MSYS2 Environment
-      uses: msys2/setup-msys2@v2
-      with:
-        msystem: mingw64
-        location: D:\
-        update: true
-        install: >-
-          mingw-w64-x86_64-cmake
-          mingw-w64-x86_64-ninja
-          mingw-w64-x86_64-python
-          base-devel
-          mingw-w64-x86_64-qt5-tools
-
-    - uses: actions/download-artifact@v4
-      with:
-        name: qtbuild
-        path: D:\msys64\opt\
-
-    - name: Build
-      shell: msys2 {0}
-      run: |
-        cd /opt/build
         cmake --build . --target docs
         cmake --install .
-
+         
     - name: Upload artifact
       uses: actions/upload-artifact@v4
       with:
