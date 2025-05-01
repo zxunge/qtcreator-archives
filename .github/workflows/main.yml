@@ -1,6 +1,7 @@
 name: windows-msys2
 
 on:
+  push:
   workflow_dispatch:
 
 jobs:
@@ -15,17 +16,17 @@ jobs:
         location: D:\
         update: true
         install: >-
-          mingw-w64-ucrt64-toolchain
-          mingw-w64-ucrt64-cmake
-          mingw-w64-ucrt64-clang-libs
-          mingw-w64-ucrt64-llvm-libs
-          mingw-w64-ucrt64-clang-tools-extra
-          mingw-w64-ucrt64-ninja
-          mingw-w64-ucrt64-python
-          mingw-w64-ucrt64-clang
-          mingw-w64-ucrt64-llvm
+          mingw-w64-ucrt-x86_64-toolchain
+          mingw-w64-ucrt-x86_64-cmake
+          mingw-w64-ucrt-x86_64-clang-libs
+          mingw-w64-ucrt-x86_64-llvm-libs
+          mingw-w64-ucrt-x86_64-clang-tools-extra
+          mingw-w64-ucrt-x86_64-ninja
+          mingw-w64-ucrt-x86_64-python
+          mingw-w64-ucrt-x86_64-clang
+          mingw-w64-ucrt-x86_64-llvm
           base-devel
-          mingw-w64-ucrt64-qt5
+          mingw-w64-ucrt-x86_64-qt5
 
     - name: Checkout
       uses: actions/checkout@v4
