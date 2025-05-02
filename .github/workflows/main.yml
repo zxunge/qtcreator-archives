@@ -30,14 +30,15 @@ jobs:
 
     - name: Checkout
       uses: actions/checkout@v4
-      with:
-        path: D:\msys64\opt\build
      
     - name: Build
       shell: msys2 {0}
       run: |
-        cd /opt
-        mkdir build && cd $_
+        # Move files
+        mkdir -p /opt/build
+        mv * /opt/build/
+        
+        cd /opt/build/
         # Install Dependencies
         #wget -q https://github.com/zxunge/mingw-package-archives/archive/refs/tags/v1.0.tar.gz
         #tar xzf *.tar.gz
