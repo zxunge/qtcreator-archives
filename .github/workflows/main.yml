@@ -32,9 +32,11 @@ jobs:
       uses: actions/checkout@v4
      
     - name: Build
+      id: build
       shell: msys2 {0}
       run: |
         TAG=8.0.2x64
+        
         # Move files
         mkdir -p /opt/build
         mv * /opt/build/
