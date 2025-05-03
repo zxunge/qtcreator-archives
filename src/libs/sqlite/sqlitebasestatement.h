@@ -517,11 +517,3 @@ public:
 };
 
 } // namespace Sqlite
-t = std::max(m_maximumResultCount, count);
-    }
-
-public:
-    std::size_t m_maximumResultCount = 0;
-};
-
-} // namespace Sqlite
