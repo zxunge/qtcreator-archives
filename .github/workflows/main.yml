@@ -1,7 +1,6 @@
 name: windows-msys2
 
 on:
-  push:
   workflow_dispatch:
 
 jobs:
@@ -53,6 +52,7 @@ jobs:
         #cp -f ../CMakeLists.txt src/plugins/
         #cp -rf ../src ./
         cp -f ../src/plugins/clangformat/CMakeLists.txt ../src/plugins/clangformat/clangformatbaseindenter.cpp ../src/plugins/clangformat/clangformatutils.cpp src/plugins/clangformat/
+        cp -f ../src/libs/sqlite/sqlitebasestatement.h src/libs/sqlite/
 
         cmake . -Wno-dev                        \
           -GNinja                               \
