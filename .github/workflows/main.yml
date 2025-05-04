@@ -11,20 +11,20 @@ jobs:
     - name: Setup MSYS2 Environment
       uses: msys2/setup-msys2@v2
       with:
-        msystem: ucrt64
+        msystem: mingw64
         location: D:\
         update: true
         install: >-
-          mingw-w64-ucrt-x86_64-toolchain
-          mingw-w64-ucrt-x86_64-cmake
-          mingw-w64-ucrt-x86_64-clang-libs
-          mingw-w64-ucrt-x86_64-llvm-libs
-          mingw-w64-ucrt-x86_64-clang-tools-extra
-          mingw-w64-ucrt-x86_64-ninja
-          mingw-w64-ucrt-x86_64-python
-          mingw-w64-ucrt-x86_64-clang
-          mingw-w64-ucrt-x86_64-llvm
-          mingw-w64-ucrt-x86_64-qt5
+          mingw-w64-x86_64-toolchain
+          mingw-w64-x86_64-cmake
+          mingw-w64-x86_64-qt5
+          mingw-w64-x86_64-clang-libs
+          mingw-w64-x86_64-llvm-libs
+          mingw-w64-x86_64-clang-tools-extra
+          mingw-w64-x86_64-ninja
+          mingw-w64-x86_64-python
+          mingw-w64-x86_64-clang
+          mingw-w64-x86_64-llvm
           base-devel
           p7zip
 
@@ -52,7 +52,7 @@ jobs:
         cd qt-creator-opensource-src-8.0.2/
         
         # Patch
-        cp -f ../psapi.h /ucrt64/include/
+        cp -f ../psapi.h /mingw64/include/
         #cp -f ../CMakeLists.txt src/plugins/
         #cp -rf ../src ./
         cp -f ../src/plugins/clangformat/CMakeLists.txt ../src/plugins/clangformat/clangformatbaseindenter.cpp ../src/plugins/clangformat/clangformatutils.cpp src/plugins/clangformat/
@@ -65,7 +65,7 @@ jobs:
           -DBUILD_DEVELOPER_DOCS=ON  \
           -DCMAKE_BUILD_TYPE=Release \
           -DBUILD_QBS=OFF            \
-          -DPython3_EXECUTABLE=/ucrt64/bin/python \
+          -DPython3_EXECUTABLE=/mingw64/bin/python \
           -DWITH_TESTS=OFF           \
           -DCLANGTOOLING_LINK_CLANG_DYLIB=ON       
          
