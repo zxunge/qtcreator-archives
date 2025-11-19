@@ -54,9 +54,16 @@ clang::format::FormatStyle qtcStyle()
     clang::format::FormatStyle style = getLLVMStyle();
     style.Language = FormatStyle::LK_Cpp;
     style.AccessModifierOffset = -4;
+#if LLVM_VERSION_MAJOR >= 22
+    style.AlignAfterOpenBracket = true;
+#else
     style.AlignAfterOpenBracket = FormatStyle::BAS_Align;
+#endif
     style.AlignEscapedNewlines = FormatStyle::ENAS_DontAlign;
-#if LLVM_VERSION_MAJOR >= 18
+#if LLVM_VERSION_MAJOR >= 20
+    style.AlignConsecutiveAssignments = {false, false, false, false, false, false, false};
+    style.AlignConsecutiveDeclarations = {false, false, false, false, false, false, false};
+#elif LLVM_VERSION_MAJOR >= 18
     style.AlignConsecutiveAssignments = {false, false, false, false, false, false};
     style.AlignConsecutiveDeclarations = {false, false, false, false, false, false};
 #elif LLVM_VERSION_MAJOR >= 15
@@ -138,7 +145,11 @@ clang::format::FormatStyle qtcStyle()
 #endif
     style.ConstructorInitializerIndentWidth = 4;
     style.ContinuationIndentWidth = 4;
+#if LLVM_VERSION_MAJOR >= 22
+    style.Cpp11BracedListStyle = FormatStyle::BLS_FunctionCall;
+#else
     style.Cpp11BracedListStyle = true;
+#endif
     style.DerivePointerAlignment = false;
     style.DisableFormat = false;
     style.ExperimentalAutoDetectBinPacking = false;
@@ -181,7 +192,9 @@ clang::format::FormatStyle qtcStyle()
 #else
     style.ReflowComments = false;
 #endif
-#if LLVM_VERSION_MAJOR >= 13
+#if LLVM_VERSION_MAJOR > 20
+    style.SortIncludes = {.Enabled = true, .IgnoreCase = false};
+#elif LLVM_VERSION_MAJOR >= 13
     style.SortIncludes = FormatStyle::SI_CaseSensitive;
 #else
     style.SortIncludes = true;
