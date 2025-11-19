@@ -18,6 +18,8 @@ jobs:
           mingw-w64-x86_64-toolchain
           mingw-w64-x86_64-cmake
           mingw-w64-x86_64-qt5
+          mingw-w64-x86_64-qt5-svg
+          mingw-w64-x86_64-libelf
           mingw-w64-x86_64-clang-libs
           mingw-w64-x86_64-llvm-libs
           mingw-w64-x86_64-clang-tools-extra
