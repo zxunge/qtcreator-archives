@@ -91,11 +91,19 @@ std::optional<TabSettings> ClangFormatIndenter::tabSettings() const
     tabSettings.m_tabSize = static_cast<int>(style.TabWidth);
     tabSettings.m_indentSize = static_cast<int>(style.IndentWidth);
 
-    if (style.AlignAfterOpenBracket == FormatStyle::BAS_DontAlign)
-        tabSettings.m_continuationAlignBehavior = TabSettings::NoContinuationAlign;
-    else
-        tabSettings.m_continuationAlignBehavior = TabSettings::ContinuationAlignWithIndent;
+    const auto alignAfterOpenBracket = [](const FormatStyle &style) {
+#if LLVM_VERSION_MAJOR >= 22
+        return style.AlignAfterOpenBracket;
+#else
+        return style.AlignAfterOpenBracket == FormatStyle::BAS_Align;
+#endif
+    };
 
+    if (alignAfterOpenBracket(style))
+        tabSettings.m_continuationAlignBehavior = TabSettings::ContinuationAlignWithIndent;
+    else
+        tabSettings.m_continuationAlignBehavior = TabSettings::NoContinuationAlign;
+    
     return tabSettings;
 }
 
