@@ -37,7 +37,7 @@ jobs:
       id: build
       shell: msys2 {0}
       run: |
-        TAG=8.0.2x64mingw
+        TAG=8.0.2x64mingw1
         
         # Move files
         mkdir -p /opt/build
@@ -69,7 +69,8 @@ jobs:
           -DBUILD_QBS=OFF            \
           -DPython3_EXECUTABLE=/mingw64/bin/python \
           -DWITH_TESTS=OFF           \
-          -DCLANGTOOLING_LINK_CLANG_DYLIB=ON       
+          -DCLANGTOOLING_LINK_CLANG_DYLIB=ON       \
+          -DBUILD_HELPVIEWERBACKEND_QTWEBENGINE=ON
          
         cmake --build . --parallel $(nproc)
         cmake --build . --target docs
